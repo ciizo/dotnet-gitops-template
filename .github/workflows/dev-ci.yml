@@ -60,8 +60,7 @@ jobs:
         id: build-and-push
         uses: docker/build-push-action@v4
         with:
-          working-directory: ${{ env.WORK_DIR }}
-          context: .
+          context: ${{ env.WORK_DIR }}
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ env.REGISTRY }}/${{ github.repository }}:${{ env.GITHUB_SHA }}
           #labels: ${{ steps.meta.outputs.labels }}
