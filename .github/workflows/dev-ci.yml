@@ -36,6 +36,9 @@ jobs:
       # - name: Test
       #   run: make test
 
+      - name: log dir
+        run: ls -la
+
       - name: Build Docker image
         run: docker build ./src/example.api --file Dockerfile --tag ${{ env.REGISTRY }}/${{ github.repository }}:${{ env.GITHUB_SHA }}
 
