@@ -1,0 +1,62 @@
+name: Dev environment CI with Makefile
+
+on:
+  push:
+    branches: ['main']
+  pull_request:
+    branches: ['main']
+
+#permissions: read-all
+
+env:
+  REGISTRY: ghcr.io
+  # github.repository as <account>/<repo>
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  # CI task
+  build-and-push-image:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v3
+
+      - name: Setup SHA
+        run: echo "GITHUB_SHA=${GITHUB_SHA}" >> $GITHUB_ENV
+
+      #- name: Build
+      #  run: make build
+
+      # - name: Test
+      #   run: make test
+
+      - name: Build Docker image
+        run: docker build . --file Dockerfile --tag ${{ env.REGISTRY }}/${{ github.repository }}:${{ env.GITHUB_SHA }}
+
+      # Login against a Docker registry except on PR
+      - name: Login to registry ${{ env.REGISTRY }}
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@v2.1.0
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.WORKFLOW_TOKEN }}
+          logout: true
+
+      # Build and push Docker image with Buildx (don't push on PR)
+      # https://github.com/docker/build-push-action
+      - name: Build and push Docker image
+        id: build-and-push
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ env.REGISTRY }}/${{ github.repository }}:${{ env.GITHUB_SHA }}
+          #labels: ${{ steps.meta.outputs.labels }}
+          #cache-from: type=gha
+          #cache-to: type=gha,mode=max
+
+      # Sign the published resulting Docker image digest except on PRs.
+      - name: Image digest
+        if: ${{ github.event_name != 'pull_request' }}
+        run: echo ${{ steps.build-and-push.outputs.digest }}
