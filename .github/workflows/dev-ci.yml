@@ -8,6 +8,10 @@ on:
 
 #permissions: read-all
 
+defaults:
+  run:
+    working-directory: ./src/example.api
+
 env:
   REGISTRY: ghcr.io
   # github.repository as <account>/<repo>
@@ -37,7 +41,7 @@ jobs:
       #   run: make test
 
       - name: Build Docker image
-        run: docker build ./src/example.api --file ./src/example.api/Dockerfile --tag ${{ env.REGISTRY }}/${{ github.repository }}:${{ env.GITHUB_SHA }}
+        run: docker build . --file Dockerfile --tag ${{ env.REGISTRY }}/${{ github.repository }}:${{ env.GITHUB_SHA }}
 
       # Login against a Docker registry except on PR
       - name: Login to registry ${{ env.REGISTRY }}
