@@ -36,11 +36,8 @@ jobs:
       # - name: Test
       #   run: make test
 
-      - name: log dir
-        run: ls -la
-
       - name: Build Docker image
-        run: docker build ./src/example.api --file Dockerfile --tag ${{ env.REGISTRY }}/${{ github.repository }}:${{ env.GITHUB_SHA }}
+        run: docker build ./src/example.api --file ./example.api/Dockerfile --tag ${{ env.REGISTRY }}/${{ github.repository }}:${{ env.GITHUB_SHA }}
 
       # Login against a Docker registry except on PR
       - name: Login to registry ${{ env.REGISTRY }}
